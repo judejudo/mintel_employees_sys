@@ -1,4 +1,11 @@
 {% extends "layout.html" %}
 {% block content %}
     <h1>My Dashboard</h1>
-{% endblock content %}
+    <h2>Allowances</h2>
+    {% for allowance in allowances %}
+        <div class="form-group">
+            {{ allowance[0] }} : KES {{ allowance[1] }}
+        </div>
+        {{}} 
+    {% endfor %}
+{% endblock %}

@@ -31,7 +31,12 @@
             </div>
             <!-- Navbar Right Side -->
             <div class="navbar-nav">
-              <a class="nav-item nav-link" href=" {{ url_for('login') }}">Login</a>
+              {% if 'username'  in session %}
+                <p class="nav-item nav-link">{{ username }}</p>
+                <a class="nav-item nav-link" href=" {{ url_for('logout') }}">Log Out</a>
+              {% else %}
+                <a class="nav-item nav-link" href=" {{ url_for('login') }}">Log In</a>
+              {% endif %}  
               <!-- <a class="nav-item nav-link" href="/register">Register</a> -->
             </div>
           </div>
@@ -66,6 +71,25 @@
           </div>
         </div>
       </div>
+   
+      {%if 'username' not in session %}
+        <div>
+          <h1>Employee Search</h1>
+          <form action="" method="GET">
+              <input type="text" name="q" placeholder="Search by last name or department">
+              <button type="submit">Search</button>
+          </form>
+        </div>
+        <table class="table is-fullwidth">
+          <thead>
+            <tr>
+              <th>Employee Name</th>
+              <th>Employee department</th>
+              <th>Date Hired</th>
+            </tr>
+          </thead>
+        </table>
+      {% endif %} 
     </main>
 
 

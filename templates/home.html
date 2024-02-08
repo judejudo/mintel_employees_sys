@@ -3,4 +3,12 @@
     <h1>Welome to mintel</h1>
     <p> Be able to search for employees and display there names, department names and  date hired, </p>
     <p> Loop through different employees in the system showing there departments and username</p>
+
+    {% for result in results %}
+        <tr>
+            <td>{{ result.last_name }}</td>
+            <td>{{ result.department_name }}</td>
+            <td>{{ result.date_hired }} </td>
+        </tr>
+    {% endfor %}
 {%  endblock content %}
