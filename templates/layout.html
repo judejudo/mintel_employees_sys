@@ -57,7 +57,7 @@
             {% endwith %}
             {% block content %}{% endblock %}
         </div>
-        <div class="col-md-4">
+        <!-- <div class="col-md-4">
           <div class="content-section">
             <h3>Our Sidebar</h3>
             <p class='text-muted'>Market leader in mobile banking solutions integrations for SACCOs.
@@ -69,27 +69,9 @@
               </ul>
             </p>
           </div>
-        </div>
+        </div> -->
       </div>
-   
-      {%if 'username' not in session %}
-        <div>
-          <h1>Employee Search</h1>
-          <form action="" method="GET">
-              <input type="text" name="q" placeholder="Search by last name or department">
-              <button type="submit">Search</button>
-          </form>
-        </div>
-        <table class="table is-fullwidth">
-          <thead>
-            <tr>
-              <th>Employee Name</th>
-              <th>Employee department</th>
-              <th>Date Hired</th>
-            </tr>
-          </thead>
-        </table>
-      {% endif %} 
+  
     </main>
 
 

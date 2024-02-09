@@ -1,11 +1,43 @@
 {% extends "layout.html" %}
 {% block content %}
-    <h1>My Dashboard</h1>
-    <h2>Allowances</h2>
-    {% for allowance in allowances %}
-        <div class="form-group">
-            {{ allowance[0] }} : KES {{ allowance[1] }}
+<div class="row">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div class="text-center mt-5 mb-4">
+                <h1>My Dashboard</h1>
+                <h2>Payment Details</h2>
+            </div>
+            <!-- <div class="card mb-4"> -->
+                <div class="card-header">
+                    <h4 class="card-title">Name: {{ username }}</h4>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Basic Salary</th>
+                                <th>Total Deductions</th>
+                                <th>Total allowance</th>
+                                <th>Net income</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for allowance in allowances %}
+                            <tr>
+                                <td>{{ allowance[0] }}</td>
+                                <td>KES {{ allowance[1] }}</td>
+                                <td>KES {{ allowance[2] }}</td>
+                                <td>KES {{ allowance[3] }}</td>
+                                <td>KES {{ allowance[4] }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            
         </div>
-        {{}} 
-    {% endfor %}
+    </div>
+</div>
+
 {% endblock %}

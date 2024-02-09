@@ -31,6 +31,10 @@ def home():
         cur.execute(query, ('%' + q + '%', '%' + q + '%'))
         results = cur.fetchall()
         cur.close()
+
+        print("Fetched Data:")
+        for row in results:
+            print(row)
         return render_template('home.html', results=results, query=q)
     else:
         return render_template('home.html', results=[], query=q)
@@ -63,22 +67,30 @@ def dashboard():
         # You can perform database queries here to fetch data for the dashboard
         cur = mysql.connection.cursor()
         cur.execute("""
-            SELECT a.allowance_name, pa.amount, p.basic_salary 
-            FROM payroll_allowances pa
-            JOIN allowances a ON a.allowance_id = pa.allowance_id
-            JOIN payroll p ON pa.payroll_id = p.payroll_id
+            SELECT p.date_created, p.basic_salary,  p.total_deductions, p.total_allowances, p.net_income
+            FROM payroll p
             JOIN employees e ON p.employee_id = e.employee_id
             WHERE e.username = %s 
-            """,(username,)
-        )
+
+        """, (username,))
         allowances = cur.fetchall()
         cur.close()
-        return render_template('dashboard.html', title='Dashboard', username=username, allowances=allowances)
+ 
+        cur = mysql.connection.cursor()
+        cur.execute("""
+            SELECT *
+            FROM payroll p
+            JOIN employees e ON e.employee_id = p.employee_id
+            WHERE username = %s """,(username,))
+        payroll_details = cur.fetchone()
+        cur.close
+        print(payroll_details)
+        return render_template('dashboard.html', title='Dashboard', username=username, allowances=allowances, payroll_details=payroll_details)
     else:
         flash('Please login first', 'danger')
         return redirect(url_for('login'))
 
-@app.route('/about')
+@app.route('/about') 
 def about():
     return render_template('about.html')
 
