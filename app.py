@@ -17,27 +17,36 @@ mysql = MySQL(app)
 @app.route("/")
 def home():
     q = request.args.get("q")
+    page = request.args.get("page", default=1, type=int)
+    per_page = 50  # Number of results per page
+
+    cur = mysql.connection.cursor()
 
     if q:
-        cur = mysql.connection.cursor()
-        # Construct the query to search for employees based on last name or department name
         query = """
-            SELECT e.last_name, e.username, d.department_name, e.date_hired
+            SELECT e.employee_id, e.last_name, e.username, d.department_name, e.date_hired
             FROM employees e
             JOIN departments d ON e.department_id = d.department_id
-            WHERE e.last_name LIKE %s OR d.department_name LIKE %s
+            WHERE e.last_name LIKE %s OR e.employee_id LIKE %s  
+            LIMIT %s OFFSET %s
         """
-        # Execute the query with the search parameter
-        cur.execute(query, ('%' + q + '%', '%' + q + '%'))
-        results = cur.fetchall()
-        cur.close()
-
-        print("Fetched Data:")
-        for row in results:
-            print(row)
-        return render_template('home.html', results=results, query=q)
+        offset = (page - 1) * per_page
+        cur.execute(query, ('%' + q + '%', '%' + q + '%', per_page, offset))
     else:
-        return render_template('home.html', results=[], query=q)
+        query = """
+            SELECT e.employee_id,e.last_name, e.username, e.date_hired
+            FROM employees e
+            
+            LIMIT %s OFFSET %s
+        """
+        offset = (page - 1) * per_page
+        cur.execute(query, (per_page, offset))
+
+    results = cur.fetchall()
+    cur.close()
+
+    return render_template('home.html', results=results, query=q, page=page)
+
 
 
 @app.route('/login', methods = ['GET', 'POST'])
@@ -58,7 +67,7 @@ def login():
         else:
             flash('Login Unsuccessful. Please check username and password', 'danger')
     return render_template('login.html', title='login', form = form)
-    
+  
 
 @app.route('/dashboard', methods = ['GET','POST'])
 def dashboard():

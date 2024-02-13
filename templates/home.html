@@ -1,23 +1,24 @@
+<!-- home.html -->
 {% extends "layout.html" %}
 {% block content %}
     <h1>Welome to mintel</h1>
-    {%if 'username' not in session %}
+    {% if 'username' not in session %}
     <div class="container">
-      <div class="row">
-          <div class="col-md-6 offset-md-3">
-              <div class="text-center mt-5 mb-4">
-                  <h1>Employee Search</h1>
-              </div>
-              <form action="/" method="GET" class="mb-4">
-                  <div class="input-group">
-                      <input type="text" name="q" class="form-control" placeholder="Search by last name or department">
-                      <div class="input-group-append">
-                          <button type="submit" class="btn btn-primary">Search</button>
-                      </div>
-                  </div>
-              </form>
-          </div>
-      </div>
+        <div class="row">
+            <div class="col-md-6 offset-md-3">
+                <div class="text-center mt-5 mb-4">
+                    <h1>Employee Search</h1>
+                </div>
+                <form action="/" method="GET" class="mb-4">
+                    <div class="input-group">
+                        <input type="text" name="q" class="form-control" placeholder="Search by last name or department">
+                        <div class="input-group-append">
+                            <button type="submit" class="btn btn-primary">Search</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
     {% endif %} 
     <!-- Display Search Results -->
@@ -29,18 +30,20 @@
                 <table class="table table-striped table-bordered">
                     <thead class="thead-dark">
                         <tr>
+                            <th>Employee ID</th>
                             <th>Employee Name</th>
                             <th>Username</th>
-                            <th>Employee Department</th>
+                            <!-- <th>Employee Department</th> -->
                             <th>Date Hired</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for result in results %}
                         <tr>
-                            <td>{{ result[0] }}</td> <!-- Last Name -->
-                            <td>{{ result[1] }}</td> <!-- Username -->
-                            <td>{{ result[2] }}</td> <!-- Department -->
+                            <td>{{ result[0] }}</td> <!-- Last Index -->
+                            <td>{{ result[1] }}</td> <!-- Last Name -->
+                            <td>{{ result[2] }}</td> <!-- Username -->
+                            <!-- <td>{{ result[3] }}</td> Department -->
                             <td>{{ result[3] }}</td> <!-- Date Hired -->
                         </tr>
                         {% endfor %}
@@ -49,7 +52,43 @@
             </div>
         </div>
     </div>
+    
+    <!-- Pagination Links -->
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        {% if query %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('home', q=query, page=1) }}" aria-label="First">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('home', page=1) }}" aria-label="First">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                        <li class="page-item disabled">
+                            <span class="page-link">Page {{ page }}</span>
+                        </li>
+                        {% if results|length == 50 %} {# Assuming 50 results per page #}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('home', q=query, page=page+1) }}" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+    
     {% else %}
         <p>No results found.</p>
     {% endif %}
-{%  endblock content %}
+{% endblock content %}
