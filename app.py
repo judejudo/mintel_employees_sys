@@ -1,8 +1,10 @@
-from flask import Flask, request, session, redirect, url_for, render_template, sessions, redirect,g, flash
+from flask import Flask, request, session, redirect, url_for, render_template, sessions, redirect,g, flash, send_file
 from config import Config
 from flask_mysqldb import MySQL
-from forms import LoginForm
+from forms import LoginForm, RegistrationForm
 from flask_sqlalchemy import SQLAlchemy
+from flask_bcrypt import Bcrypt
+import pandas as pd
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -14,6 +16,8 @@ mysql_password = app.config['MYSQL_PASSWORD']
 mysql_db = app.config['MYSQL_DB']
 
 mysql = MySQL(app)
+bcrypt = Bcrypt(app)
+
 @app.route("/")
 def home():
     q = request.args.get("q")
@@ -24,19 +28,19 @@ def home():
 
     if q:
         query = """
-            SELECT e.employee_id, e.last_name, e.username, d.department_name, e.date_hired
-            FROM employees e
-            JOIN departments d ON e.department_id = d.department_id
-            WHERE e.last_name LIKE %s OR e.employee_id LIKE %s  
+            SELECT employee_id, last_name, username, date_hired
+            FROM employees 
+            WHERE last_name LIKE %s 
             LIMIT %s OFFSET %s
         """
         offset = (page - 1) * per_page
-        cur.execute(query, ('%' + q + '%', '%' + q + '%', per_page, offset))
+        search_term = f"%{q}%" 
+        cur.execute(query, (search_term, per_page, offset))
+
     else:
         query = """
             SELECT e.employee_id,e.last_name, e.username, e.date_hired
             FROM employees e
-            
             LIMIT %s OFFSET %s
         """
         offset = (page - 1) * per_page
@@ -47,6 +51,31 @@ def home():
 
     return render_template('home.html', results=results, query=q, page=page)
 
+@app.route('/registration', methods=['GET', 'POST'])
+def registration():
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        lastname = form.lastname.data
+        username = form.username.data
+        status_id = form.status_id.data
+        department_id = form.department_id.data
+        password = form.password.data
+        status = form.status.data
+        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+        cur = mysql.connection.cursor()
+        cur.execute("""
+            INSERT INTO employees (status_id, department_id, last_name, username, password, date_hired, date_modified, status)
+            VALUES (%s, %s, %s, %s, %s, NOW(), NOW(), %s)
+            """, (status_id, department_id, lastname, username, hashed_password, status)
+        )
+        mysql.connection.commit()  # Don't forget to commit changes
+        flash('Registration successful. Please Sign In', 'success')
+        cur.close()  # Close cursor after use
+        return redirect(url_for('login'))
+    else:
+        return render_template('registration.html', title='Registration', form=form)
+
+
 
 
 @app.route('/login', methods = ['GET', 'POST'])
@@ -55,6 +84,7 @@ def login():
     if form.validate_on_submit():
         username = form.username.data
         password = form.password.data
+
         cur = mysql.connection.cursor()
         cur.execute("SELECT * FROM employees WHERE username = %s AND password = %s", (username, password))
         user = cur.fetchone()
@@ -109,6 +139,33 @@ def logout():
     session.pop('username', None)
     flash('You have been logged out', 'info')
     return redirect(url_for('home'))
+
+@app.route('/download_excel')
+def download_excel():
+    query = "SELECT * FROM employees LIMIT 100"
+    cur = mysql.connection.cursor()
+    cur.execute(query)
+    all_rows = cur.fetchall()
+    columns = [column[0] for column in cur.description]
+
+    # num_chunks = (len(all_rows) + 999999) // 1000000  # Ceiling division to get the number of chunks
+
+    # excel_writer = pd.ExcelWriter('output_file.xlsx', engine='xlsxwriter')
+    # for i in range(num_chunks):
+    #     start_idx = i * 1000000
+    #     end_idx = min((i + 1) * 1000000, len(all_rows))
+    #     chunk = all_rows[start_idx:end_idx]
+    #     df = pd.DataFrame(chunk, columns=columns)
+    #     sheet_name = f'Sheet_{i+1}'
+    #     df.to_excel(excel_writer, sheet_name=sheet_name, index=False)
+
+    
+    # excel_writer.close()
+
+    df = pd.DataFrame(all_rows, columns=columns)
+    # Close the cursor
+    cur.close()
+    return send_file('output_file.xlsx', as_attachment=True)
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -35,7 +35,8 @@
                 <p class="nav-item nav-link">{{ username }}</p>
                 <a class="nav-item nav-link" href=" {{ url_for('logout') }}">Log Out</a>
               {% else %}
-                <a class="nav-item nav-link" href=" {{ url_for('login') }}">Log In</a>
+                <a class="nav-item nav-link" href=" {{ url_for('registration') }}">Sign Up</a>
+                <a class="nav-item nav-link" href=" {{ url_for('login') }}">Sign In</a>
               {% endif %}  
               <!-- <a class="nav-item nav-link" href="/register">Register</a> -->
             </div>
